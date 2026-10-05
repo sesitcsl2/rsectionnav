@@ -1,0 +1,9 @@
+Name: Next R Section
+Description: Jump to the next R section or standalone code block
+Binding: next_section
+Interactive: false
+
+Name: Previous R Section
+Description: Jump to the previous R section or standalone code block
+Binding: previous_section
+Interactive: false
