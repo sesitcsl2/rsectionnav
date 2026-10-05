@@ -7,3 +7,13 @@ Name: Previous R Section
 Description: Jump to the previous R section or standalone code block
 Binding: previous_section
 Interactive: false
+
+Name: Next R Sibling
+Description: Jump to the next sibling section or block, climbing when necessary
+Binding: next_sibling
+Interactive: false
+
+Name: Previous R Sibling
+Description: Jump to the previous sibling section or block, climbing when necessary
+Binding: previous_sibling
+Interactive: false
