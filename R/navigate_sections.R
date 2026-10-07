@@ -112,6 +112,46 @@
   )))
 }
 
+.paragraph_starts <- function(contents) {
+  nonblank <- nzchar(trimws(contents))
+
+  which(
+    nonblank &
+      c(TRUE, !head(nonblank, -1L))
+  )
+}
+
+.paragraph_ends <- function(contents) {
+  nonblank <- nzchar(trimws(contents))
+
+  which(
+    nonblank &
+      c(!tail(nonblank, -1L), TRUE)
+  )
+}
+
+.paragraph_targets <- function(contents) {
+  sort(unique(c(
+    .paragraph_starts(contents),
+    .paragraph_ends(contents)
+  )))
+}
+
+.first_text_column <- function(line) {
+  pos <- regexpr("[^[:space:]]", line, perl = TRUE)
+
+  if (pos < 1L) {
+    1L
+  } else {
+    as.integer(pos)
+  }
+}
+
+.end_text_column <- function(line) {
+  line <- sub("[[:space:]]+$", "", line, perl = TRUE)
+  nchar(line) + 1L
+}
+
 #' Jump to next section or standalone block
 #' @export
 next_section <- function() {
@@ -243,6 +283,76 @@ previous_sibling <- function() {
 
     rstudioapi::setCursorPosition(
       c(targets$line[target], 1),
+      id = ctx$id
+    )
+  }
+
+  invisible(NULL)
+}
+
+#' Jump to next paragraph boundary
+#' @export
+next_paragraph <- function() {
+  ctx <- rstudioapi::getSourceEditorContext()
+
+  current_row <- as.integer(
+    ctx$selection[[1]]$range$start[1]
+  )
+
+  starts <- .paragraph_starts(ctx$contents)
+  ends <- .paragraph_ends(ctx$contents)
+  targets <- sort(unique(c(starts, ends)))
+
+  target <- targets[targets > current_row]
+
+  if (length(target)) {
+    row <- target[1]
+
+    # A one-line paragraph is both start and end.
+    # When travelling downward, treat it as a start.
+    if (row %in% starts) {
+      column <- .first_text_column(ctx$contents[row])
+    } else {
+      column <- .end_text_column(ctx$contents[row])
+    }
+
+    rstudioapi::setCursorPosition(
+      c(row, column),
+      id = ctx$id
+    )
+  }
+
+  invisible(NULL)
+}
+
+#' Jump to previous paragraph boundary
+#' @export
+previous_paragraph <- function() {
+  ctx <- rstudioapi::getSourceEditorContext()
+
+  current_row <- as.integer(
+    ctx$selection[[1]]$range$start[1]
+  )
+
+  starts <- .paragraph_starts(ctx$contents)
+  ends <- .paragraph_ends(ctx$contents)
+  targets <- sort(unique(c(starts, ends)))
+
+  target <- targets[targets < current_row]
+
+  if (length(target)) {
+    row <- tail(target, 1)
+
+    # A one-line paragraph is both start and end.
+    # When travelling upward, treat it as an end.
+    if (row %in% ends) {
+      column <- .end_text_column(ctx$contents[row])
+    } else {
+      column <- .first_text_column(ctx$contents[row])
+    }
+
+    rstudioapi::setCursorPosition(
+      c(row, column),
       id = ctx$id
     )
   }

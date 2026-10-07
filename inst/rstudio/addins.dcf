@@ -17,3 +17,13 @@ Name: Previous R Sibling
 Description: Jump to the previous sibling section or block, climbing when necessary
 Binding: previous_sibling
 Interactive: false
+
+Name: Next R Paragraph
+Description: Jump to the next block of code separated by blank lines
+Binding: next_paragraph
+Interactive: false
+
+Name: Previous R Paragraph
+Description: Jump to the previous block of code separated by blank lines
+Binding: previous_paragraph
+Interactive: false
